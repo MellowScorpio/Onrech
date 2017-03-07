@@ -1,6 +1,7 @@
 package pl.milek.onrech;
 
 import pl.milek.onrech.graphics.Screen;
+import pl.milek.onrech.input.Keyboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,6 +19,7 @@ public class Game extends Canvas implements Runnable {
 
     private Thread thread;
     private JFrame frame;
+    private Keyboard key;
     private boolean running = false;
 
     private Screen screen;
@@ -25,13 +27,18 @@ public class Game extends Canvas implements Runnable {
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
+    private int x = 0, y = 0;
+
     // executed once when we create object
     public Game() {
         Dimension size = new Dimension(WIDTH * SCALE, HEIGHT * SCALE);
         setPreferredSize(size);
 
-        frame = new JFrame();
         screen = new Screen(WIDTH, HEIGHT);
+        frame = new JFrame();
+        key = new Keyboard();
+
+        addKeyListener(key);
     }
 
     public synchronized void start() {
@@ -52,14 +59,41 @@ public class Game extends Canvas implements Runnable {
     // because game implements runnable - when we start the thread
     // it calls the run method
     public void run() {
+        long lastTime = System.nanoTime();
+        long timer = System.currentTimeMillis();
+        final double ns = 1000000000.0 / 60.0;
+        double delta = 0;
+        int frames = 0;
+        int updates = 0;
         while (running) {
-            update();
+            long now = System.nanoTime();
+            delta += (now - lastTime) / ns;
+            lastTime = now;
+            while (delta >= 1) {
+                update();
+                updates++;
+                delta--;
+            }
             render();
+            frames++;
+
+            // ensure that it happens once per second?
+            if (System.currentTimeMillis() - timer > 1000) {
+                timer += 1000;
+                frame.setTitle(TITLE + "     |    " + updates + "ups " + frames + "fps");
+                updates = 0;
+                frames = 0;
+            }
         }
+        stop();
     }
 
     private void update() {
-
+        key.update();
+        if (key.up) y--;
+        if (key.down) y++;
+        if (key.left) x--;
+        if (key.right) x++;
     }
 
     private void render() {
@@ -70,7 +104,7 @@ public class Game extends Canvas implements Runnable {
         }
 
         screen.clear();
-        screen.render();
+        screen.render(x, y);
 
         for (int i = 0; i < pixels.length; i++) {
             pixels[i] = screen.pixels[i];
@@ -95,5 +129,6 @@ public class Game extends Canvas implements Runnable {
         game.frame.setVisible(true);
 
         game.start();
+        game.requestFocusInWindow();
     }
 }
