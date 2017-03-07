@@ -1,7 +1,10 @@
 package pl.milek.onrech;
 
+import pl.milek.onrech.entity.mob.Player;
 import pl.milek.onrech.graphics.Screen;
 import pl.milek.onrech.input.Keyboard;
+import pl.milek.onrech.level.Level;
+import pl.milek.onrech.level.RandomLevel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,14 +23,14 @@ public class Game extends Canvas implements Runnable {
     private Thread thread;
     private JFrame frame;
     private Keyboard key;
+    private Level level;
+    private Player player;
     private boolean running = false;
 
     private Screen screen;
 
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-
-    private int x = 0, y = 0;
 
     // executed once when we create object
     public Game() {
@@ -37,6 +40,8 @@ public class Game extends Canvas implements Runnable {
         screen = new Screen(WIDTH, HEIGHT);
         frame = new JFrame();
         key = new Keyboard();
+        level = new RandomLevel(64, 64);
+        player = new Player(key);
 
         addKeyListener(key);
     }
@@ -90,10 +95,7 @@ public class Game extends Canvas implements Runnable {
 
     private void update() {
         key.update();
-        if (key.up) y--;
-        if (key.down) y++;
-        if (key.left) x--;
-        if (key.right) x++;
+        player.update();
     }
 
     private void render() {
@@ -104,7 +106,10 @@ public class Game extends Canvas implements Runnable {
         }
 
         screen.clear();
-        screen.render(x, y);
+        int xScroll = player.x - screen.width / 2;
+        int yScroll = player.y - screen.height / 2;
+        level.render(xScroll, yScroll, screen);
+        player.render(screen);
 
         for (int i = 0; i < pixels.length; i++) {
             pixels[i] = screen.pixels[i];
