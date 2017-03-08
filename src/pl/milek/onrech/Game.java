@@ -4,7 +4,7 @@ import pl.milek.onrech.entity.mob.Player;
 import pl.milek.onrech.graphics.Screen;
 import pl.milek.onrech.input.Keyboard;
 import pl.milek.onrech.level.Level;
-import pl.milek.onrech.level.RandomLevel;
+import pl.milek.onrech.level.SpawnLevel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,8 +40,8 @@ public class Game extends Canvas implements Runnable {
         screen = new Screen(WIDTH, HEIGHT);
         frame = new JFrame();
         key = new Keyboard();
-        level = new RandomLevel(64, 64);
-        player = new Player(key);
+        level = new SpawnLevel("/textures/levels/level.png");
+        player = new Player(130, 130, key);
 
         addKeyListener(key);
     }
