@@ -15,20 +15,16 @@ public class Keyboard implements KeyListener {
         right = keys[KeyEvent.VK_RIGHT] || keys[KeyEvent.VK_D];
     }
 
-
-    @Override
     public void keyPressed(KeyEvent e) {
         keys[e.getKeyCode()] = true;
         //System.out.println(KeyEvent.getKeyText(e.getKeyCode()));
 
     }
 
-    @Override
     public void keyReleased(KeyEvent e) {
         keys[e.getKeyCode()] = false;
     }
 
-    @Override
     public void keyTyped(KeyEvent e) {
 
     }
